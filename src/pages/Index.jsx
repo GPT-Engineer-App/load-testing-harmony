@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Paw, Heart, Instagram, Twitter, Facebook, ChevronDown, Cat, Fish, Mouse, Gift, Mail } from "lucide-react";
+import { Paw, Heart, Instagram, Twitter, Facebook, ChevronDown, Cat, Fish, Mouse, Gift, Mail, Star, Sparkles } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const catFacts = [
   "Cats sleep for about 70% of their lives.",
@@ -21,11 +24,47 @@ const catFacts = [
 ];
 
 const catBreeds = [
-  { name: "Siamese", image: "https://upload.wikimedia.org/wikipedia/commons/2/25/Siam_lilacpoint.jpg" },
-  { name: "Persian", image: "https://upload.wikimedia.org/wikipedia/commons/1/15/White_Persian_Cat.jpg" },
-  { name: "Maine Coon", image: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Maine_Coon_cat_by_Tomitheos.JPG" },
-  { name: "Bengal", image: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Paintedcats_Red_Star_standing.jpg" },
-  { name: "Scottish Fold", image: "https://upload.wikimedia.org/wikipedia/commons/5/5d/Adult_Scottish_Fold.jpg" },
+  { name: "Siamese", image: "https://upload.wikimedia.org/wikipedia/commons/2/25/Siam_lilacpoint.jpg", description: "Known for their distinctive color points and blue almond-shaped eyes." },
+  { name: "Persian", image: "https://upload.wikimedia.org/wikipedia/commons/1/15/White_Persian_Cat.jpg", description: "Characterized by their long, fluffy coat and round face." },
+  { name: "Maine Coon", image: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Maine_Coon_cat_by_Tomitheos.JPG", description: "One of the largest domesticated cat breeds with a distinctive physical appearance." },
+  { name: "Bengal", image: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Paintedcats_Red_Star_standing.jpg", description: "Known for their wild appearance with spotted or marbled coat patterns." },
+  { name: "Scottish Fold", image: "https://upload.wikimedia.org/wikipedia/commons/5/5d/Adult_Scottish_Fold.jpg", description: "Characterized by their unique folded ears and round, owl-like face." },
+];
+
+const catPersonalities = [
+  { trait: "Playfulness", score: 85 },
+  { trait: "Affection", score: 90 },
+  { trait: "Intelligence", score: 75 },
+  { trait: "Energy", score: 70 },
+  { trait: "Independence", score: 60 },
+];
+
+const catQuizQuestions = [
+  {
+    question: "Which cat breed is known for its blue eyes and color-point coat?",
+    options: ["Siamese", "Persian", "Maine Coon", "Bengal"],
+    correctAnswer: "Siamese"
+  },
+  {
+    question: "Which cat breed is known for its folded ears?",
+    options: ["Scottish Fold", "British Shorthair", "Russian Blue", "Sphynx"],
+    correctAnswer: "Scottish Fold"
+  },
+  {
+    question: "Which cat breed is known for its lack of fur?",
+    options: ["Sphynx", "Persian", "Ragdoll", "Abyssinian"],
+    correctAnswer: "Sphynx"
+  },
+  {
+    question: "Which cat breed is known for its wild appearance with spotted or marbled coat patterns?",
+    options: ["Bengal", "Siamese", "Maine Coon", "Persian"],
+    correctAnswer: "Bengal"
+  },
+  {
+    question: "Which cat breed is known for being one of the largest domesticated cat breeds?",
+    options: ["Maine Coon", "Siamese", "Russian Blue", "Munchkin"],
+    correctAnswer: "Maine Coon"
+  }
 ];
 
 const Index = () => {
@@ -35,6 +74,9 @@ const Index = () => {
   const [quizAnswer, setQuizAnswer] = useState("");
   const [toyPosition, setToyPosition] = useState({ x: 50, y: 50 });
   const [email, setEmail] = useState("");
+  const [score, setScore] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(false);
 
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -62,14 +104,26 @@ const Index = () => {
     setCatFact(newFact);
   };
 
-  const handleQuizSubmit = (e) => {
-    e.preventDefault();
-    if (quizAnswer.toLowerCase() === "siamese") {
-      toast.success("Correct! You're a cat breed expert!");
+  const handleQuizAnswer = (answer) => {
+    if (answer === catQuizQuestions[currentQuestion].correctAnswer) {
+      setScore(score + 1);
+      toast.success("Correct answer!");
     } else {
-      toast.error("Oops! That's not correct. Try again!");
+      toast.error(`Incorrect. The correct answer is ${catQuizQuestions[currentQuestion].correctAnswer}.`);
     }
-    setQuizAnswer("");
+
+    if (currentQuestion < catQuizQuestions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      setQuizCompleted(true);
+      toast.success(`Quiz completed! Your score: ${score + 1} out of 5`);
+    }
+  };
+
+  const resetQuiz = () => {
+    setCurrentQuestion(0);
+    setScore(0);
+    setQuizCompleted(false);
   };
 
   const moveToy = () => {
@@ -119,7 +173,7 @@ const Index = () => {
       <div className="flex-grow pt-16">
         <motion.div 
           ref={heroRef}
-          className="bg-cover bg-center h-screen flex items-center justify-center relative"
+          className="bg-cover bg-center h-screen flex items-center justify-center relative overflow-hidden"
           style={{
             backgroundImage: "url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
             opacity: heroOpacity,
@@ -127,13 +181,64 @@ const Index = () => {
           }}
         >
           <motion.div 
-            className="text-center text-white bg-black bg-opacity-50 p-12 rounded-lg"
+            className="text-center text-white bg-black bg-opacity-50 p-12 rounded-lg relative z-10"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-6xl font-bold mb-6">All About Cats</h1>
-            <p className="text-2xl">Discover the fascinating world of our feline friends</p>
+            <motion.h1 
+              className="text-6xl font-bold mb-6"
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              All About Cats
+            </motion.h1>
+            <motion.p 
+              className="text-2xl"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              Discover the fascinating world of our feline friends
+            </motion.p>
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              <Badge className="mt-4 text-lg bg-gradient-to-r from-pink-500 to-purple-500">Meow-nificent!</Badge>
+            </motion.div>
+          </motion.div>
+          <motion.div
+            className="absolute inset-0 z-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.3 }}
+            transition={{ delay: 0.8, duration: 1 }}
+          >
+            {[...Array(20)].map((_, index) => (
+              <motion.div
+                key={index}
+                className="absolute"
+                initial={{
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight,
+                  scale: 0,
+                }}
+                animate={{
+                  scale: [0, 1, 0],
+                  rotate: [0, 180, 360],
+                }}
+                transition={{
+                  duration: Math.random() * 2 + 1,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  delay: Math.random() * 2,
+                }}
+              >
+                <Sparkles className="text-yellow-300" size={24} />
+              </motion.div>
+            ))}
           </motion.div>
           {showScrollDown && (
             <motion.div 
@@ -188,24 +293,56 @@ const Index = () => {
                 <CardDescription className="text-gray-200">Some well-known cat breeds around the world</CardDescription>
               </CardHeader>
               <CardContent>
-                <Carousel className="w-full max-w-xs mx-auto">
-                  <CarouselContent>
-                    {catBreeds.map((breed, index) => (
-                      <CarouselItem key={index}>
-                        <div className="p-1">
-                          <Card>
-                            <CardContent className="flex aspect-square items-center justify-center p-6">
-                              <img src={breed.image} alt={breed.name} className="w-full h-full object-cover rounded-md" />
-                            </CardContent>
-                          </Card>
-                          <h3 className="text-center mt-2 font-semibold">{breed.name}</h3>
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </Carousel>
+                <Tabs defaultValue="carousel" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="carousel">Carousel</TabsTrigger>
+                    <TabsTrigger value="grid">Grid</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="carousel">
+                    <Carousel className="w-full max-w-xs mx-auto">
+                      <CarouselContent>
+                        {catBreeds.map((breed, index) => (
+                          <CarouselItem key={index}>
+                            <motion.div 
+                              className="p-1"
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.5 }}
+                            >
+                              <Card>
+                                <CardContent className="flex aspect-square items-center justify-center p-6">
+                                  <img src={breed.image} alt={breed.name} className="w-full h-full object-cover rounded-md" />
+                                </CardContent>
+                              </Card>
+                              <h3 className="text-center mt-2 font-semibold">{breed.name}</h3>
+                              <p className="text-center text-sm mt-1">{breed.description}</p>
+                            </motion.div>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+                  </TabsContent>
+                  <TabsContent value="grid">
+                    <div className="grid grid-cols-2 gap-4">
+                      {catBreeds.map((breed, index) => (
+                        <motion.div 
+                          key={index}
+                          className="relative overflow-hidden rounded-lg"
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <img src={breed.image} alt={breed.name} className="w-full h-48 object-cover" />
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4">
+                            <h3 className="text-lg font-semibold">{breed.name}</h3>
+                            <p className="text-sm mt-1">{breed.description}</p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </motion.div>
@@ -254,19 +391,25 @@ const Index = () => {
                 <CardDescription className="text-gray-200">Test your knowledge of cat breeds!</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleQuizSubmit} className="space-y-4">
-                  <p className="text-xl mb-4">Which cat breed is known for its blue eyes and color-point coat?</p>
-                  <Input
-                    type="text"
-                    placeholder="Enter your answer"
-                    value={quizAnswer}
-                    onChange={(e) => setQuizAnswer(e.target.value)}
-                    className="bg-white text-black"
-                  />
-                  <Button type="submit" className="bg-white text-orange-500 hover:bg-gray-100 transition-colors duration-300">
-                    Submit Answer
-                  </Button>
-                </form>
+                <div className="space-y-4">
+                  <p className="text-xl mb-4">Question {currentQuestion + 1} of 5:</p>
+                  <p className="text-lg font-semibold">{catQuizQuestions[currentQuestion].question}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {catQuizQuestions[currentQuestion].options.map((option, index) => (
+                      <Button
+                        key={index}
+                        onClick={() => handleQuizAnswer(option)}
+                        className="bg-white text-orange-500 hover:bg-gray-100 transition-colors duration-300"
+                      >
+                        {option}
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-lg font-semibold">Score: {score} / 5</p>
+                    <Progress value={(score / 5) * 100} className="mt-2" />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
