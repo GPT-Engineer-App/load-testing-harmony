@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Paw, Heart, Instagram, Twitter, Facebook } from "lucide-react";
+import { Paw, Heart, Instagram, Twitter, Facebook, ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
 
 const catFacts = [
   "Cats sleep for about 70% of their lives.",
@@ -13,6 +14,16 @@ const catFacts = [
 
 const Index = () => {
   const [catFact, setCatFact] = useState(catFacts[0]);
+  const [showScrollDown, setShowScrollDown] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollDown(window.scrollY < 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const generateCatFact = () => {
     const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
@@ -21,32 +32,65 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <nav className="bg-gray-800 text-white p-4">
+      <nav className="bg-gradient-to-r from-purple-600 to-pink-500 text-white p-4 fixed w-full z-10">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">CatWorld</h1>
-          <ul className="flex space-x-4">
-            <li><a href="#" className="hover:text-gray-300">Home</a></li>
-            <li><a href="#" className="hover:text-gray-300">About</a></li>
-            <li><a href="#" className="hover:text-gray-300">Gallery</a></li>
-            <li><a href="#" className="hover:text-gray-300">Contact</a></li>
+          <motion.h1 
+            className="text-3xl font-bold"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            CatWorld
+          </motion.h1>
+          <ul className="flex space-x-6">
+            {["Home", "About", "Gallery", "Contact"].map((item, index) => (
+              <motion.li 
+                key={item}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <a href="#" className="hover:text-gray-300 transition-colors duration-300">{item}</a>
+              </motion.li>
+            ))}
           </ul>
         </div>
       </nav>
 
-      <div className="flex-grow">
-        <div className="bg-cover bg-center h-96 flex items-center justify-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}>
-          <div className="text-center text-white bg-black bg-opacity-50 p-8 rounded-lg">
-            <h1 className="text-5xl font-bold mb-4">All About Cats</h1>
-            <p className="text-xl">Discover the fascinating world of our feline friends</p>
-          </div>
+      <div className="flex-grow pt-16">
+        <div className="bg-cover bg-center h-screen flex items-center justify-center relative" style={{backgroundImage: "url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}>
+          <motion.div 
+            className="text-center text-white bg-black bg-opacity-50 p-12 rounded-lg"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-6xl font-bold mb-6">All About Cats</h1>
+            <p className="text-2xl">Discover the fascinating world of our feline friends</p>
+          </motion.div>
+          {showScrollDown && (
+            <motion.div 
+              className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+            >
+              <ChevronDown className="text-white w-12 h-12" />
+            </motion.div>
+          )}
         </div>
 
-        <div className="container mx-auto py-12 px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card>
+        <div className="container mx-auto py-16 px-4">
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
               <CardHeader>
-                <CardTitle className="flex items-center"><Paw className="mr-2" /> Characteristics of Cats</CardTitle>
-                <CardDescription>What makes cats unique?</CardDescription>
+                <CardTitle className="flex items-center text-2xl"><Paw className="mr-2" /> Characteristics of Cats</CardTitle>
+                <CardDescription className="text-gray-200">What makes cats unique?</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="list-disc pl-6 space-y-2">
@@ -59,10 +103,10 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="bg-gradient-to-br from-pink-500 to-orange-400 text-white">
               <CardHeader>
-                <CardTitle className="flex items-center"><Heart className="mr-2" /> Popular Cat Breeds</CardTitle>
-                <CardDescription>Some well-known cat breeds around the world</CardDescription>
+                <CardTitle className="flex items-center text-2xl"><Heart className="mr-2" /> Popular Cat Breeds</CardTitle>
+                <CardDescription className="text-gray-200">Some well-known cat breeds around the world</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="list-disc pl-6 space-y-2">
@@ -74,28 +118,47 @@ const Index = () => {
                 </ul>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
 
-          <Card className="mt-12">
-            <CardHeader>
-              <CardTitle>Cat Fact Generator</CardTitle>
-              <CardDescription>Learn interesting facts about cats!</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 text-lg">{catFact}</p>
-              <Button onClick={generateCatFact}>Generate New Fact</Button>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="mt-16 bg-gradient-to-r from-green-400 to-blue-500 text-white">
+              <CardHeader>
+                <CardTitle className="text-2xl">Cat Fact Generator</CardTitle>
+                <CardDescription className="text-gray-200">Learn interesting facts about cats!</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-6 text-xl">{catFact}</p>
+                <Button 
+                  onClick={generateCatFact}
+                  className="bg-white text-blue-500 hover:bg-gray-100 transition-colors duration-300"
+                >
+                  Generate New Fact
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
 
-      <footer className="bg-gray-800 text-white py-8">
+      <footer className="bg-gradient-to-r from-purple-600 to-pink-500 text-white py-12">
         <div className="container mx-auto text-center">
-          <p className="mb-4">&copy; 2023 CatWorld. All rights reserved.</p>
-          <div className="flex justify-center space-x-4">
-            <a href="#" className="hover:text-gray-300"><Instagram /></a>
-            <a href="#" className="hover:text-gray-300"><Twitter /></a>
-            <a href="#" className="hover:text-gray-300"><Facebook /></a>
+          <p className="mb-6 text-xl">&copy; 2023 CatWorld. All rights reserved.</p>
+          <div className="flex justify-center space-x-6">
+            {[Instagram, Twitter, Facebook].map((Icon, index) => (
+              <motion.a 
+                key={index}
+                href="#" 
+                className="text-white hover:text-gray-300 transition-colors duration-300"
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Icon size={32} />
+              </motion.a>
+            ))}
           </div>
         </div>
       </footer>
